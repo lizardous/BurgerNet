@@ -118,8 +118,4 @@ public class Client extends Observable {
 		replyQueue = channel.queueDeclare().getQueue();
 		channel.queueBind(replyQueue, Server.BROADCAST_EXCHG, "");
 	}
-
-	public static void main(String[] args){
-
-	}
 }

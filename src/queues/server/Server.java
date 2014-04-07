@@ -151,7 +151,6 @@ public class Server {
 			mainLoop();
 		} catch (ShutdownSignalException | ConsumerCancelledException
 				| ClassNotFoundException | IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
