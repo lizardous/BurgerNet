@@ -51,6 +51,8 @@ public class Client extends Observable {
 	private void handleMessage(Message msg, Delivery del) {
 		System.out.println("> "+msg);
 		switch(msg.getType()){
+			case End:
+				this.currentEvent = null;
 			case Confirm:
 			case RequestConfirm: 
 			case Detail: 
@@ -99,13 +101,20 @@ public class Client extends Observable {
 	}
 
 	public void confirm(boolean c){
+		if(this.currentEvent == null) return;
 		Message msg = new Message(Message.Types.Confirm, this.currentEvent, "", "", this.lat, this.lon);
 		msg.setConfirmation(c);
 		sendMessage(msg);
 	}
 
 	public void detail(String description){
+		if(this.currentEvent == null) return;
 		sendMessage(new Message(Message.Types.Detail, this.currentEvent, "", description, this.lat, this.lon));
+	}
+	
+	public void end(){
+		if(this.currentEvent == null) return;
+		sendMessage(new Message(Message.Types.End, this.currentEvent, "", "", this.lat, this.lon));
 	}
 
 	public Client(double lat, double lon) throws IOException{
@@ -119,5 +128,6 @@ public class Client extends Observable {
 		channel.queueBind(replyQueue, Server.BROADCAST_EXCHG, "");
 		
 		updateLocation(lat, lon);
+		this.currentEvent = null;
 	}
 }

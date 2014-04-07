@@ -24,6 +24,7 @@ public class Event implements Serializable {
 	private double lat;
 	private double lon;
 	private boolean confirmation;
+	private boolean ended;
 	
 	private ArrayList<String> log;
 	
@@ -71,6 +72,15 @@ public class Event implements Serializable {
 	public void setOriginId(String originId) {
 		this.originId = originId;
 	}
+	public boolean isEnded() {
+		return ended;
+	}
+	public void setEnded(boolean ended) {
+		this.ended = ended;
+		if(this.ended){
+			this.addDetail(this.originId + " ended the event");
+		}
+	}
 	
 	public void addDetail(String d){
 		d = "["+dateFormatter.format(new Date())+"] " + d.trim() + "\n";
@@ -103,6 +113,6 @@ public class Event implements Serializable {
 		this.setOriginId(originId);
 		
 		this.log("["+dateFormatter.format(new Date())+"] "+title+" @ "+lat+", "+lon+"\n\n");
-		this.addDetail(description);
+		this.addDetail(originId+": "+description);
 	}
 }

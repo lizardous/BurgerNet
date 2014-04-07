@@ -33,6 +33,7 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 	private Button btnEmergency;
 	private Button btnConfirm;
 	private Button btnDetail;
+	private Button btnEnd;
 	
 	private Client client;
 	
@@ -70,6 +71,10 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		add(btnDetail);
 		btnDetail.addActionListener(this);
 		
+		btnEnd = new Button("End event");
+		add(btnEnd);
+		btnEnd.addActionListener(this);
+		
 		addWindowListener(this);
 		
 		setTitle("BurgerNet Client");
@@ -82,11 +87,11 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		o.addObserver(this);
 		this.client = o;
 		
-		makeGUI();
-		
 		(new Thread(){
 			public void run(){ o.start(); }
 		}).start();
+		
+		makeGUI();
 	}
 
 	@Override
@@ -104,6 +109,10 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 			if(tfDet.getText().trim().length() > 0)
 				this.client.detail(tfDet.getText());
 			tfDet.setText("");
+		}
+		
+		if((Button)evt.getSource() == btnEnd){
+			this.client.end();
 		}
 	}
 
@@ -133,6 +142,26 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		if(msg.getType() == Message.Types.Detail || msg.getType() == Message.Types.Confirm){
 			lblNotice.setText("Details added");
 		}
+		switch(msg.getType()){
+			case RequestConfirm: 
+				lblNotice.setText("Please confirm this emergency");
+				break;
+			case Detail:
+				lblNotice.setText("Details added");
+				break;
+			case Confirm:
+				lblNotice.setText("Emergency confirmed");
+				break;
+			case End:
+				lblNotice.setText("Event ended");
+				break;
+			case Emergency:
+				lblNotice.setText("New emergency");
+				break;
+			case Location:
+				break;
+		}
+		
 		lblEvtId.setText("(Event id: "+msg.getEventId()+")");
 		tfTitle.setText(msg.getTitle());
 		tfDesc.setText(msg.getDescription());

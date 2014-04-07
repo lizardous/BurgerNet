@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class Message implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	public enum Types{ Location, Emergency, RequestConfirm, Confirm, Detail };
+	public enum Types{ Location, Emergency, RequestConfirm, Confirm, Detail, End };
 	
 	private Types type;
 	private String title;

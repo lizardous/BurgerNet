@@ -29,13 +29,17 @@ public class Server {
 	private HashMap<String,Client> clients;
 	private HashMap<String,Event> events;
 	
-	private void distribute(Message msg, Event evt) throws IOException{
+	private void distribute(Message msg, Event evt){
 		BasicProperties replyProps = new BasicProperties.Builder().correlationId(evt.getId()).build();
 
 		System.out.println("< "+msg);
 		
 		for(Client c : evt.getClients()){
-			channel.basicPublish("", c.getReplyChannel(), replyProps, msg.toByteArray());
+			try {
+				channel.basicPublish("", c.getReplyChannel(), replyProps, msg.toByteArray());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -49,8 +53,19 @@ public class Server {
 			}
 		}
 	}
+	
+	private boolean validateMessage(String cId, String eId){
+		if(!clients.containsKey(cId)){
+			return false;
+		}
+		if(!events.containsKey(eId)){
+			return false;
+		}
+		
+		return true;
+	}
 
-	private void handleMessage(Delivery del) throws IOException, ClassNotFoundException{
+	private void handleMessage(Delivery del) throws ClassNotFoundException, IOException{
 		Message msg = (Message) new ObjectInputStream(new ByteArrayInputStream(del.getBody())).readObject();
 		
 		msg.setDescription(msg.getDescription().trim());
@@ -63,19 +78,32 @@ public class Server {
 			case Emergency: handleEmergency(msg, del); break;
 			case Confirm: handleConfirmation(msg, del); break;
 			case Detail: handleDetail(msg, del); break;
+			case End: handleEnd(msg, del); break;
 			case RequestConfirm: break;
 		}
 	}
 
-	private void handleDetail(Message msg, Delivery del) throws IOException {
+	private void handleEnd(Message msg, Delivery del) {
 		String cId = del.getProperties().getReplyTo();
 		String eId = del.getProperties().getCorrelationId();
-		if(!clients.containsKey(cId)){
-			return;
-		}
-		if(!events.containsKey(eId)){
-			return;
-		}
+		if(!validateMessage(cId, eId)) return;
+		
+		Event evt = events.get(eId);
+		if(!cId.equals(evt.getOriginId())) return; // Only origin can end event
+		
+		evt.setEnded(true);
+		msg.absorbEvent(evt);
+		
+		distribute(msg, evt);
+		
+		this.events.remove(eId);
+	}
+
+	private void handleDetail(Message msg, Delivery del) {
+		String cId = del.getProperties().getReplyTo();
+		String eId = del.getProperties().getCorrelationId();
+		if(!validateMessage(cId, eId)) return;
+		
 		Event evt = events.get(eId);
 		evt.addDetail(cId+": "+msg.getDescription());
 		
@@ -84,16 +112,10 @@ public class Server {
 		distribute(msg, evt);
 	}
 
-	private void handleConfirmation(Message msg, Delivery del) throws IOException {
+	private void handleConfirmation(Message msg, Delivery del) {
 		String cId = del.getProperties().getReplyTo();
 		String eId = del.getProperties().getCorrelationId();
-		
-		if(!clients.containsKey(cId)){
-			return;
-		}
-		if(!events.containsKey(eId)){
-			return;
-		}
+		if(!validateMessage(cId, eId)) return;
 		
 		Event evt = events.get(eId);
 		if(evt.isConfirmation()) return;
@@ -107,7 +129,7 @@ public class Server {
 		distribute(msg, evt);
 	}
 
-	private void handleEmergency(Message msg, Delivery del) throws IOException {
+	private void handleEmergency(Message msg, Delivery del) {
 		String id = del.getProperties().getReplyTo();
 		if(!clients.containsKey(id)){
 			clients.put(id, new Client(id, msg.getLat(), msg.getLon()));
