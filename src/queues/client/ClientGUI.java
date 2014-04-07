@@ -34,6 +34,7 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 	private Button btnConfirm;
 	private Button btnDetail;
 	private Button btnEnd;
+	private Button btnLoc;
 	
 	private Client client;
 	
@@ -54,6 +55,10 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		tfLon = new TextField("6");
 		add(tfLon);
 		
+		btnLoc = new Button("Update Location");
+		add(btnLoc);
+		btnLoc.addActionListener(this);
+		
 		lblNotice = new Label("-");
 		add(lblNotice);
 		
@@ -71,7 +76,7 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		add(btnDetail);
 		btnDetail.addActionListener(this);
 		
-		btnEnd = new Button("End event");
+		btnEnd = new Button("End Event");
 		add(btnEnd);
 		btnEnd.addActionListener(this);
 		
@@ -101,7 +106,7 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		}
 		
 		if((Button)evt.getSource() == btnEmergency){
-			this.client.updateLocation(Double.parseDouble(tfLat.getText()), Double.parseDouble(tfLon.getText()));
+			this.client.setLatLon(Double.parseDouble(tfLat.getText()), Double.parseDouble(tfLon.getText()));
 			this.client.emergency(tfTitle.getText(), tfDesc.getText() + "\n");
 		}
 		
@@ -113,6 +118,10 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		
 		if((Button)evt.getSource() == btnEnd){
 			this.client.end();
+		}
+		
+		if((Button)evt.getSource() == btnLoc){
+			this.client.updateLocation(Double.parseDouble(tfLat.getText()), Double.parseDouble(tfLon.getText()));
 		}
 	}
 

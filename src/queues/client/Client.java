@@ -50,9 +50,12 @@ public class Client extends Observable {
 
 	private void handleMessage(Message msg, Delivery del) {
 		System.out.println("> "+msg);
+		
+		if(currentEvent != null && !msg.getEventId().equals(currentEvent)) return; // ignore other events when we're already in one
+		
 		switch(msg.getType()){
 			case End:
-				this.currentEvent = null;
+				msg.setEventId(null);
 			case Confirm:
 			case RequestConfirm: 
 			case Detail: 
@@ -115,6 +118,11 @@ public class Client extends Observable {
 	public void end(){
 		if(this.currentEvent == null) return;
 		sendMessage(new Message(Message.Types.End, this.currentEvent, "", "", this.lat, this.lon));
+	}
+	
+	public void setLatLon(double lat, double lon){
+		this.lat = lat;
+		this.lon = lon;
 	}
 
 	public Client(double lat, double lon) throws IOException{

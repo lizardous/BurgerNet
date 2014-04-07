@@ -62,6 +62,8 @@ public class Server {
 			return false;
 		}
 		
+		if(events.get(eId).isEnded()) return false;
+		
 		return true;
 	}
 
@@ -105,6 +107,7 @@ public class Server {
 		if(!validateMessage(cId, eId)) return;
 		
 		Event evt = events.get(eId);
+		
 		evt.addDetail(cId+": "+msg.getDescription());
 		
 		msg.absorbEvent(evt);
@@ -135,13 +138,19 @@ public class Server {
 			clients.put(id, new Client(id, msg.getLat(), msg.getLon()));
 		}
 		
+		Client client = clients.get(id);
 		String eventId = del.getProperties().getCorrelationId();
 		Event evt = new Event(eventId, msg.getTitle(), msg.getDescription(), msg.getLat(), msg.getLon(), id);
-		evt.getClients().add(clients.get(id));
+		client.setLat(msg.getLat());
+		client.setLon(msg.getLon());
+		
+		evt.getClients().add(client);
 		findAndAddNeighbours(evt);
 		msg.setEventId(eventId);
 		msg.setType(Message.Types.RequestConfirm);
 		events.put(eventId, evt);
+		
+		msg.absorbEvent(evt);
 
 		distribute(msg, evt);
 	}
