@@ -108,7 +108,7 @@ public class Client extends Observable {
 		sendMessage(new Message(Message.Types.Detail, this.currentEvent, "", description, this.lat, this.lon));
 	}
 
-	public Client() throws IOException{
+	public Client(double lat, double lon) throws IOException{
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost("localhost");
 		Connection connection = factory.newConnection();
@@ -117,5 +117,7 @@ public class Client extends Observable {
 		channel.exchangeDeclare(Server.BROADCAST_EXCHG, "fanout");
 		replyQueue = channel.queueDeclare().getQueue();
 		channel.queueBind(replyQueue, Server.BROADCAST_EXCHG, "");
+		
+		updateLocation(lat, lon);
 	}
 }

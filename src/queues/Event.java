@@ -3,16 +3,24 @@ package queues;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Event {
-	private Set<queues.server.Client> clients;
+public class Event implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+	transient private Set<queues.server.Client> clients;
 	
 	private String id;
 	private String title;
 	private String description;
+	private String originId;
 	private double lat;
 	private double lon;
 	private boolean confirmation;
@@ -57,35 +65,44 @@ public class Event {
 	public void setConfirmation(boolean confirmation) {
 		this.confirmation = confirmation;
 	}
+	public String getOriginId() {
+		return originId;
+	}
+	public void setOriginId(String originId) {
+		this.originId = originId;
+	}
 	
 	public void addDetail(String d){
-		this.description += d + "\n";
+		d = "["+dateFormatter.format(new Date())+"] " + d.trim() + "\n";
+		this.description += d;
 		
 		this.log(d);
 	}
 	
-	public void log(String s){ // lolwut variabele 'log' en method 'log'..?
+	private void log(String s){ // lolwut variabele 'log' en method 'log'..?
 		this.log.add(s);
 		String fileName = Event.logDir + "/" + this.id + ".log";
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(fileName, true));
-			out.write(s+"\n");
+			out.write(s);
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public Event(String id, String title, String description, double lat, double lon){
+	public Event(String id, String title, String description, double lat, double lon, String originId){
 		this.clients = new HashSet<queues.server.Client>();
 		this.log = new ArrayList<String>();
 		
 		this.setId(id);
 		this.setTitle(title);
 		this.description = "";
-		this.addDetail(description);
 		this.setLat(lat);
 		this.setLon(lon);
-		this.log("New Event: "+title+"\n\n"+description+"\n\nAt: "+lat+", "+lon);
+		this.setOriginId(originId);
+		
+		this.log("["+dateFormatter.format(new Date())+"] "+title+" @ "+lat+", "+lon+"\n\n");
+		this.addDetail(description);
 	}
 }

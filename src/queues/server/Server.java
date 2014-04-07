@@ -41,8 +41,8 @@ public class Server {
 	
 	private void findAndAddNeighbours(Event evt){
 		for(Client c : clients.values()){
-			double x = Math.abs(evt.getLat() - c.getLat());
-			double y = Math.abs(evt.getLon() - c.getLon());
+			double x = evt.getLat() - c.getLat();
+			double y = evt.getLon() - c.getLon();
 			double dist = Math.sqrt(x*x + y*y);
 			if(dist < DISTANCE){
 				evt.getClients().add(c);
@@ -87,14 +87,17 @@ public class Server {
 	private void handleConfirmation(Message msg, Delivery del) throws IOException {
 		String cId = del.getProperties().getReplyTo();
 		String eId = del.getProperties().getCorrelationId();
+		
 		if(!clients.containsKey(cId)){
 			return;
 		}
 		if(!events.containsKey(eId)){
 			return;
 		}
+		
 		Event evt = events.get(eId);
 		if(evt.isConfirmation()) return;
+		if(evt.getOriginId().equals(cId)) return; // can't confirm own emergency
 		
 		evt.setConfirmation(msg.isConfirmation());
 		evt.addDetail(cId+" confirmed this event");
@@ -111,7 +114,7 @@ public class Server {
 		}
 		
 		String eventId = del.getProperties().getCorrelationId();
-		Event evt = new Event(eventId, msg.getTitle(), msg.getDescription(), msg.getLat(), msg.getLon());
+		Event evt = new Event(eventId, msg.getTitle(), msg.getDescription(), msg.getLat(), msg.getLon(), id);
 		evt.getClients().add(clients.get(id));
 		findAndAddNeighbours(evt);
 		msg.setEventId(eventId);
@@ -135,7 +138,7 @@ public class Server {
 		QueueingConsumer consumer = new QueueingConsumer(channel);
 		channel.basicConsume(QUEUE_NAME, false, consumer);
 
-		System.out.println(" [x] Awaiting RPC requests");
+		System.out.println("- Awaiting messages");
 
 		while(true){
 			QueueingConsumer.Delivery delivery = consumer.nextDelivery();

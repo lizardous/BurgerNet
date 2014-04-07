@@ -63,7 +63,7 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		addWindowListener(this);
 		
 		setTitle("BurgerNet Client");
-		setSize(400, 800);
+		setSize(600, 800);
 		setVisible(true);
 	}
 	
@@ -128,7 +128,7 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 	}
 
 	public static void main(String[] args) throws IOException {
-		new ClientGUI(new Client());
+		new ClientGUI(new Client(56, 7));
 	}
 
 }
