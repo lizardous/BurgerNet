@@ -29,17 +29,14 @@ public class ReceiverTest {
 			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 
 			BasicProperties props = delivery.getProperties();
-			BasicProperties replyProps = new BasicProperties
-					.Builder()
-					.correlationId(props.getCorrelationId())
-					.build();
+			BasicProperties replyProps = new BasicProperties.Builder().correlationId(props.getCorrelationId()).build();
 
 			String message = new String(delivery.getBody());
 
 			System.out.println(" [.] Received '" + message + "'");
 			String response = message + " derp";
 
-			channel.basicPublish( "", props.getReplyTo(), replyProps, response.getBytes());
+			channel.basicPublish("", props.getReplyTo(), replyProps, response.getBytes());
 
 			channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 		}

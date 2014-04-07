@@ -1,7 +1,5 @@
 package queues;
 
-import java.io.IOException;
-
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -9,7 +7,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
 public class SenderTest {
-
 	public static final String QUEUE_NAME = "hello";
 	private Connection connection;
 	private Channel channel;
@@ -27,7 +24,7 @@ public class SenderTest {
 		channel.basicConsume(replyQueueName, true, consumer);
 	}
 
-	public String call(String message) throws Exception {     
+	public String call(String message) throws Exception {
 		String response = null;
 		String corrId = java.util.UUID.randomUUID().toString();
 
