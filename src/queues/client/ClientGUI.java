@@ -25,7 +25,10 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 	private TextArea tfDesc;
 	private TextField tfLat;
 	private TextField tfLon;
+	private TextArea tfDet;
+	
 	private Label lblNotice;
+	private Label lblEvtId;
 	
 	private Button btnEmergency;
 	private Button btnConfirm;
@@ -37,6 +40,9 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		
 		add(new Label("BurgerNet Client"));
+		
+		lblEvtId = new Label();
+		add(lblEvtId);
 		
 		tfTitle = new TextField("Test ");
 		add(tfTitle);
@@ -56,6 +62,10 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		btnConfirm = new Button("Confirm");
 		add(btnConfirm);
 		btnConfirm.addActionListener(this);
+		
+		tfDet = new TextArea();
+		add(tfDet);
+		
 		btnDetail = new Button("Add Details");
 		add(btnDetail);
 		btnDetail.addActionListener(this);
@@ -91,7 +101,9 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		}
 		
 		if((Button)evt.getSource() == btnDetail){
-			this.client.detail(tfDesc.getText());
+			if(tfDet.getText().trim().length() > 0)
+				this.client.detail(tfDet.getText());
+			tfDet.setText("");
 		}
 	}
 
@@ -121,6 +133,7 @@ public class ClientGUI extends Frame implements ActionListener, WindowListener, 
 		if(msg.getType() == Message.Types.Detail || msg.getType() == Message.Types.Confirm){
 			lblNotice.setText("Details added");
 		}
+		lblEvtId.setText("(Event id: "+msg.getEventId()+")");
 		tfTitle.setText(msg.getTitle());
 		tfDesc.setText(msg.getDescription());
 		tfLat.setText(""+msg.getLat());
